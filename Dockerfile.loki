@@ -7,6 +7,6 @@ USER 1000:1000
 WORKDIR /
 
 # Copy required files and run necessary preperations here.
-COPY loki/config.yaml /etc/loki/local-config.yaml
+COPY loki/config.yaml /etc/loki/
 
-CMD [ "-config.file=/etc/loki/local-config.yaml" ]
+CMD [ "-config.file=/etc/loki/config.yaml" ]

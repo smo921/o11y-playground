@@ -11,6 +11,7 @@ services:
     env_file:
       - .env
     volumes:
+      - ./vector:/etc/vector
       - ./data_dir/vector:/data_dir
       - ./log_files:/log_files
     networks:
@@ -21,6 +22,7 @@ services:
       context: .
       dockerfile: Dockerfile.loki
     volumes:
+      - ./loki:/etc/loki
       - ./data_dir/loki:/loki
     ports:
       - "3100:3100"

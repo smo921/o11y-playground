@@ -4,9 +4,7 @@ FROM timberio/vector:0.37.1-debian
 # Run as non-root. Use GID 1000 to allow access to vault token from vault agent
 USER 1000:1000
 
-ENV VECTOR_LOG=debug
-ENV VECTOR_CONFIG_DIR=/vector
-WORKDIR ${VECTOR_CONFIG_DIR}
+# Copy vector configuration
+COPY vector/vector.yaml /etc/vector/vector.yaml
 
-# Copy required files and run necessary preperations here.
-COPY vector/ .
+CMD [ "--watch-config" ]
