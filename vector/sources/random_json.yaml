@@ -1,0 +1,4 @@
+type: demo_logs
+format: json
+interval: ${RANDOM_JSON_MESSAGE_INTERVAL:-0.001}  # seconds between messages ; 1k / sec
+count: 1000000000 # 1 Billion

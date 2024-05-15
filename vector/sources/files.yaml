@@ -1,0 +1,4 @@
+type: file
+include:
+  - /log_files/*
+read_from: beginning
