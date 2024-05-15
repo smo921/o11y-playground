@@ -9,6 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile.vector
     env_file:
+      - default.env
       - .env
     volumes:
       - ./vector:/etc/vector
