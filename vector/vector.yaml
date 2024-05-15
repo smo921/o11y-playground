@@ -12,6 +12,9 @@ sources:
   vector_logs:
     type: internal_logs
 
+  vector_metrics:
+    type: internal_metrics
+
   random_json:
     type: demo_logs
     format: json
@@ -64,3 +67,12 @@ sinks:
       codec: json
     labels:
       source: "{{.source}}"
+
+  local_influxdb:
+    type: influxdb_metrics
+    inputs:
+      - vector_metrics
+    bucket: vector-bucket
+    endpoint: http://influxdb:8086/
+    org: test_org
+    token: ${INFLUXDB_TOKEN}
