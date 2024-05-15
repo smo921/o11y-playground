@@ -76,3 +76,9 @@ sinks:
     endpoint: http://influxdb:8086/
     org: test_org
     token: ${INFLUXDB_TOKEN}
+
+  local_prometheus:
+    type: prometheus_remote_write
+    inputs:
+      - vector_metrics
+    endpoint: http://prometheus:9090/api/v1/write
