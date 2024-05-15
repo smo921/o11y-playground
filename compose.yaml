@@ -80,3 +80,13 @@ services:
     volumes:
       - ./influxdb:/etc/influxdb2
       - ./data_dir/influxdb:/var/lib/influxdb2
+
+  ##############################################
+  #              BEGIN PROMETHEUS              #
+  ##############################################
+  prometheus:
+    image: prom/prometheus:v2.45.5
+    ports:
+      - "9090:9090"
+    networks:
+      - loki
