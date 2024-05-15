@@ -14,6 +14,8 @@ services:
       - ./vector:/etc/vector
       - ./data_dir/vector:/data_dir
       - ./log_files:/log_files
+    ports:
+      - "8686:8686"
     networks:
       - loki
 
