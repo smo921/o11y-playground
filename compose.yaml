@@ -61,3 +61,35 @@ services:
       - "3000:3000"
     networks:
       - loki
+
+  ##############################################
+  #              BEGIN INFLUXDB                #
+  ##############################################
+  influxdb:
+    image: influxdb:2
+    env_file:
+      - default.env
+      - .env
+    ports:
+      - "8086:8086"
+    networks:
+      - loki
+    volumes:
+      - ./influxdb:/etc/influxdb2
+      - ./data_dir/influxdb:/var/lib/influxdb2
+
+  ##############################################
+  #              BEGIN PROMETHEUS              #
+  ##############################################
+  prometheus:
+    image: prom/prometheus:v2.45.5
+    command: >
+      --config.file=/etc/prometheus/prometheus.yml
+      --storage.tsdb.path=/prometheus
+      --web.console.libraries=/usr/share/prometheus/console_libraries
+      --web.console.templates=/usr/share/prometheus/consoles/prometheus
+      --enable-feature=remote-write-receiver
+    ports:
+      - "9090:9090"
+    networks:
+      - loki

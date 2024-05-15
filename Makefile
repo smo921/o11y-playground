@@ -1,5 +1,5 @@
 setup_repo:
-	mkdir -p data_dir/loki data_dir/vector log_files
+	mkdir -p data_dir/loki data_dir/vector data_dir/influxdb log_files
 
 build:
 	docker compose build
