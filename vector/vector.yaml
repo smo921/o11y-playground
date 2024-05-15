@@ -19,7 +19,7 @@ sources:
     type: demo_logs
     format: json
     interval: ${RANDOM_JSON_MESSAGE_INTERVAL:-0.001}  # seconds between messages ; 1k / sec
-    count:  ${RANDOM_JSON_MESSAGE_COUNT:-1000000000} # 1 Billion
+    count: ${RANDOM_JSON_MESSAGE_COUNT:-1000000000} # 1 Billion
 
   files:
     type: file
@@ -67,6 +67,7 @@ sinks:
       codec: json
     labels:
       source: "{{.source}}"
+    out_of_order_action: accept
 
   local_influxdb:
     type: influxdb_metrics
