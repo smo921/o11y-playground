@@ -5,26 +5,62 @@ api:
   enabled: true
 data_dir: /data_dir
 
+##############################################
+#              BEGIN SOURCES                 #
+##############################################
 sources:
+  vector_logs:
+    type: internal_logs
+
   random_json:
     type: demo_logs
     format: json
     interval: ${RANDOM_JSON_MESSAGE_INTERVAL:-0.001}  # seconds between messages ; 1k / sec
     count:  ${RANDOM_JSON_MESSAGE_COUNT:-1000000000} # 1 Billion
-#  files:
-#    type: file
-#    include:
-#      - /log_files/*
-#    read_from: beginning
 
+  files:
+    type: file
+    include:
+      - /log_files/*
+    read_from: beginning
+
+##############################################
+#              BEGIN TRANSFORMS              #
+##############################################
+transforms:
+  files_decoration:
+    type: remap
+    inputs:
+      - files
+    source: |
+      .source = "files"
+
+  internal_log_decoration:
+    type: remap
+    inputs:
+      - vector_logs
+    source: |
+      .source = "vector"
+
+  random_json_decoration:
+    type: remap
+    inputs:
+      - random_json
+    source: |
+      .source = "random_json"
+
+##############################################
+#              BEGIN SINKS                   #
+##############################################
 sinks:
   local_loki:
     type: loki
     inputs:
-    #  - files
-      - random_json
+      - internal_log_decoration
+      - files_decoration
+      - random_json_decoration
     endpoint: http://loki:3100
     encoding:
       codec: json
     labels:
-      source: vector
+      source: "{{.source}}"
