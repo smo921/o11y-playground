@@ -73,8 +73,11 @@ services:
   influxdb:
     image: influxdb:2
     env_file:
-      - default.env
-      - .env
+      - path: default.env
+      - path: ./influxdb/influxdb-setup.env
+        required: false
+      - path: .env
+        required: false
     ports:
       - "8086:8086"
     networks:
