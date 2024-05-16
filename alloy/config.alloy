@@ -1,0 +1,39 @@
+logging {
+  level  = "info"
+  format = "json"
+  write_to = [loki.write.local_loki.receiver]
+}
+
+loki.write "local_loki" {
+    endpoint {
+        url = "http://loki:3100/loki/api/v1/push"
+    }
+}
+
+prometheus.exporter.process "localhost" {
+
+}
+
+prometheus.exporter.unix "localhost" {
+    set_collectors = [ "cpu", "disk", "netdev", "netstat" ]
+}
+
+prometheus.scrape "localhost" {
+  targets    = concat(prometheus.exporter.unix.localhost.targets, prometheus.exporter.process.localhost.targets)
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+prometheus.scrape "alloy" {
+  // Collect metrics from the default listen address.
+  targets = [{
+    __address__ = "localhost:12345",
+  }]
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write" // "http://prometheus:9090/api/prom/push"
+  }
+}
