@@ -3,6 +3,11 @@ version: '3'
 networks:
   loki:
 
+volumes:
+  influxdb-data:
+  loki-data:
+  vector-data:
+
 services:
   vector:
     build:
@@ -13,7 +18,7 @@ services:
       - .env
     volumes:
       - ./vector:/etc/vector
-      - ./data_dir/vector:/data_dir
+      - vector-data:/data_dir
       - ./log_files:/log_files
     ports:
       - "8686:8686"
@@ -26,7 +31,7 @@ services:
       dockerfile: Dockerfile.loki
     volumes:
       - ./loki:/etc/loki
-      - ./data_dir/loki:/loki
+      - loki-data:/loki
     ports:
       - "3100:3100"
     networks:
@@ -76,7 +81,8 @@ services:
       - loki
     volumes:
       - ./influxdb:/etc/influxdb2
-      - ./data_dir/influxdb:/var/lib/influxdb2
+      - ./influxdb/scripts:/docker-entrypoint-initdb.d
+      - influxdb-data:/var/lib/influxdb2
 
   ##############################################
   #              BEGIN PROMETHEUS              #
