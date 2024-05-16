@@ -10,9 +10,8 @@ volumes:
 
 services:
   vector:
-    build:
-      context: .
-      dockerfile: Dockerfile.vector
+    image: timberio/vector:0.37.1-debian
+    command: --watch-config
     env_file:
       - default.env
       - .env
@@ -26,9 +25,8 @@ services:
       - loki
 
   loki:
-    build:
-      context: .
-      dockerfile: Dockerfile.loki
+    image: grafana/loki:2.9.2
+    command: -config.file=/etc/loki/config.yaml
     volumes:
       - ./loki:/etc/loki
       - loki-data:/loki
