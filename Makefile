@@ -23,8 +23,8 @@ clean: clean_influxdb
 clean_influxdb:
 	docker compose down influxdb
 	docker compose ps --services influxdb -q | xargs docker rm
-	docker volume rm -f loki_playground_influxdb-data
-	rm -f influxdb/influx-configs influxdb/tokens/*
+	docker volume rm -f loki_playground_influxdb-data loki_playground_secrets
+	rm -f influxdb/influx-configs
 
 env:
 	cp example.env .env

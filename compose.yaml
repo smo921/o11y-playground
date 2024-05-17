@@ -7,18 +7,35 @@ volumes:
   influxdb-data:
   loki-data:
   vector-data:
+  secrets:
 
 services:
+  autoheal:
+    image: willfarrell/autoheal:latest
+    tty: true
+    container_name: autoheal
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   vector:
-    image: timberio/vector:0.37.1-debian
-    command: --watch-config
+    build:
+      context: .
+      dockerfile: vector/Dockerfile
     env_file:
       - default.env
       - .env
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    labels:
+      - "autoheal=true"
+    restart: always
     volumes:
       - ./vector:/etc/vector
       - vector-data:/data_dir
       - ./log_files:/log_files
+      - secrets:/secrets
     ports:
       - "8686:8686"
     networks:
@@ -74,6 +91,12 @@ services:
       - default.env
       - ./influxdb/influxdb-setup.env
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/bin/ls", "/secrets/influxdb_tokens/vector_token"]
+      interval: 30s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
     ports:
       - "8086:8086"
     networks:
@@ -82,6 +105,7 @@ services:
       - ./influxdb:/etc/influxdb2
       - ./influxdb/scripts:/docker-entrypoint-initdb.d
       - influxdb-data:/var/lib/influxdb2
+      - secrets:/secrets
 
   ##############################################
   #              BEGIN PROMETHEUS              #

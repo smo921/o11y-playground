@@ -1,5 +1,5 @@
 .env
 
 influxdb/influx-configs
-influxdb/tokens/
+
 log_files/

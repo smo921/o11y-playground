@@ -29,4 +29,5 @@ VECTOR_TOKEN=`influx auth list \
 
 echo "Auth Token for ${VECTOR_USERNAME}, '${VECTOR_TOKEN}'"
 CONFIG_DIR=/etc/influxdb2
-echo "VECTOR_INFLUXDB_TOKEN=${VECTOR_TOKEN}" > ${CONFIG_DIR}/tokens/vector_token
+mkdir -p $(dirname ${VECTOR_INFLUXDB_TOKEN_PATH})
+echo "VECTOR_INFLUXDB_TOKEN=${VECTOR_TOKEN}" > ${VECTOR_INFLUXDB_TOKEN_PATH}
