@@ -16,7 +16,7 @@ stop:
 down:
 	docker compose down
 
-clean: clean_influxdb
+clean: down clean_influxdb
 	docker compose down
 	docker compose ps -aq | xargs docker rm
 
