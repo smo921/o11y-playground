@@ -1,7 +1,5 @@
 .env
 
-data_dir/influxdb
-data_dir/loki
-data_dir/vector
+influxdb/influx-configs
 
 log_files/
