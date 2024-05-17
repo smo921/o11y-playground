@@ -73,10 +73,11 @@ sinks:
     type: influxdb_metrics
     inputs:
       - vector_metrics
-    bucket: vector-bucket
+    bucket: ${VECTOR_INFLUXDB_METRICS_BUCKET}
     endpoint: http://influxdb:8086/
     org: test_org
-    token: ${INFLUXDB_TOKEN}
+    token: ${VECTOR_INFLUXDB_TOKEN}
+
 
   local_prometheus:
     type: prometheus_remote_write
