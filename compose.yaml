@@ -10,13 +10,33 @@ volumes:
   secrets:
 
 services:
-  autoheal:
+  autoheal: # https://github.com/willfarrell/docker-autoheal
     image: willfarrell/autoheal:latest
     tty: true
     container_name: autoheal
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  ##############################################
+  #              BEGIN GRAFANA ALLOY           #
+  ##############################################
+  alloy:
+    image: grafana/alloy:v1.1.0
+    env_file:
+      - default.env
+      - .env
+    command: >
+      run --server.http.listen-addr=0.0.0.0:12345
+      --storage.path=/var/lib/alloy/data
+      /etc/alloy/config.alloy
+    ports:
+      - "12345:12345"
+    networks:
+      - loki
+    volumes:
+      - ./alloy:/etc/alloy
+      - ./data_dir/alloy:/var/lib/alloy/data
 
   vector:
     build:
