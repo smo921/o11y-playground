@@ -4,6 +4,7 @@ networks:
   loki:
 
 volumes:
+  alloy-data:
   influxdb-data:
   loki-data:
   vector-data:
@@ -36,7 +37,7 @@ services:
       - loki
     volumes:
       - ./alloy:/etc/alloy
-      - ./data_dir/alloy:/var/lib/alloy/data
+      - alloy-data:/var/lib/alloy/data
 
   vector:
     build:
