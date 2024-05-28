@@ -25,9 +25,9 @@ influx auth create \
 
 VECTOR_TOKEN=`influx auth list \
   --user ${VECTOR_USERNAME} | \
-  awk -F' ' '$4 == "vector" { print $3 }'`
+  awk -F' ' '$2 == "Vector-Internal-Metrics" { print $3 }'`
 
 echo "Auth Token for ${VECTOR_USERNAME}, '${VECTOR_TOKEN}'"
 CONFIG_DIR=/etc/influxdb2
 mkdir -p $(dirname ${VECTOR_INFLUXDB_TOKEN_PATH})
-echo "VECTOR_INFLUXDB_TOKEN=${VECTOR_TOKEN}" > ${VECTOR_INFLUXDB_TOKEN_PATH}
+echo "${VECTOR_TOKEN}" > ${VECTOR_INFLUXDB_TOKEN_PATH}
