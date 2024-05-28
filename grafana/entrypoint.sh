@@ -3,6 +3,7 @@
 set -e
 
 
+# Read InfluxDB API Token from $VECTOR_INFLUXDB_TOKEN_PATH
 echo "Vector token path: ${VECTOR_INFLUXDB_TOKEN_PATH}"
 while [ ! -f ${VECTOR_INFLUXDB_TOKEN_PATH} ]; do
   echo "No influxdb token found, sleeping 5 seconds"
