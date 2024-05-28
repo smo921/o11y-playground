@@ -49,6 +49,8 @@ services:
     depends_on:
       influxdb:
         condition: service_healthy
+      prometheus:
+        condition: service_started
     labels:
       - "autoheal=true"
     restart: always
