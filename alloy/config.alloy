@@ -5,9 +5,9 @@ logging {
 }
 
 loki.write "local_loki" {
-    endpoint {
-        url = "http://loki:3100/loki/api/v1/push"
-    }
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
 }
 
 prometheus.exporter.process "localhost" {
@@ -16,7 +16,7 @@ prometheus.exporter.process "localhost" {
 
 // Collect basic system metrics from the localhost
 prometheus.exporter.unix "localhost" {
-    set_collectors = [ "cpu", "disk", "netdev", "netstat" ]
+  set_collectors = [ "cpu", "disk", "netdev", "netstat" ]
 }
 
 discovery.relabel "localhost_label_cleanup" {
@@ -33,32 +33,32 @@ discovery.relabel "localhost_label_cleanup" {
 
 // Begin Docker metrics
 prometheus.exporter.cadvisor "integrations_cadvisor" {
-    docker_only = true
+  docker_only = true
 }
 
 discovery.relabel "integrations_cadvisor" {
-    targets = prometheus.exporter.cadvisor.integrations_cadvisor.targets
+  targets = prometheus.exporter.cadvisor.integrations_cadvisor.targets
 
-    rule {
-      target_label = "job"
-      replacement  = "integrations/docker"
-    }
+  rule {
+    target_label = "job"
+    replacement  = "integrations/docker"
+  }
 
-    rule {
-      target_label = "instance"
-      replacement  = "localhost" // constants.hostname
-    }
+  rule {
+    target_label = "instance"
+    replacement  = "localhost" // constants.hostname
+  }
 
-    rule {
-      source_labels = ["__meta_docker_container_name"]
-      regex         = "/(.*)"
-      target_label  = "container"
-    }
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
 }
 // End Docker metrics
 
 prometheus.scrape "localhost" {
-  targets    = concat(
+  targets = concat(
     discovery.relabel.localhost_label_cleanup.output,
     discovery.relabel.integrations_cadvisor.output,
     [
