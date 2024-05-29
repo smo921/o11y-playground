@@ -32,6 +32,15 @@ prometheus.scrape "alloy" {
   forward_to = [prometheus.remote_write.default.receiver]
 }
 
+prometheus.scrape "loki" {
+  targets = [{
+    __address__ = "loki:3100",
+    __metrics_path__ = "/metrics",
+  }]
+
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
 prometheus.remote_write "default" {
   endpoint {
     url = "http://prometheus:9090/api/v1/write" // "http://prometheus:9090/api/prom/push"
