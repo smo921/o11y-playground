@@ -1,0 +1,117 @@
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: earning-hawking-377001
+spec:
+    color: '#326BBA'
+    name: "001"
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Dashboard
+metadata:
+    name: clever-perlman-377003
+spec:
+    associations:
+        - kind: Label
+          name: earning-hawking-377001
+    charts:
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          colorizeRows: true
+          colors:
+            - hex: '#31C0F6'
+              id: P8LeMa3jcL6JXyXOQEEsd
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#A500A5'
+              id: yslWwcwDDANkd1kDssseL
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#FF7E27'
+              id: U9wuPSnyo3Hp5S51PP4j7
+              name: Nineteen Eighty Four
+              type: scale
+          geom: line
+          height: 4
+          hoverDimension: auto
+          kind: Xy
+          legendColorizeRows: true
+          legendOpacity: 1
+          legendOrientationThreshold: 1e+08
+          name: Component Bytes - rate
+          opacity: 1
+          orientationThreshold: 1e+08
+          position: overlaid
+          queries:
+            - query: |-
+                import "experimental/aggregate"
+                from(bucket: "vector-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "vector.component_received_event_bytes_total" or r["_measurement"] == "vector.component_sent_event_bytes_total")
+                  |> aggregate.rate(every: 10s, unit: 1s, groupColumns: ["_measurement"])
+          staticLegend:
+            colorizeRows: true
+            opacity: 1
+            orientationThreshold: 1e+08
+            widthRatio: 1
+          width: 7
+          widthRatio: 1
+          xCol: _time
+          yCol: _value
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          colorizeRows: true
+          colors:
+            - hex: '#31C0F6'
+              id: P8LeMa3jcL6JXyXOQEEsd
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#A500A5'
+              id: yslWwcwDDANkd1kDssseL
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#FF7E27'
+              id: U9wuPSnyo3Hp5S51PP4j7
+              name: Nineteen Eighty Four
+              type: scale
+          geom: line
+          height: 4
+          hoverDimension: auto
+          kind: Xy
+          legendColorizeRows: true
+          legendOpacity: 1
+          legendOrientationThreshold: 1e+08
+          name: Event Throughput
+          opacity: 1
+          orientationThreshold: 1e+08
+          position: overlaid
+          queries:
+            - query: |-
+                from(bucket: "vector-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "vector.component_received_events_total" or r["_measurement"] == "vector.component_sent_events_total")
+                  |> filter(fn: (r) => r["_field"] == "value")
+                  |> filter(fn: (r) => r["component_id"] == "blackhole" or r["component_id"] == "random_json")
+                  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+                  |> yield(name: "mean")
+          staticLegend:
+            colorizeRows: true
+            opacity: 1
+            orientationThreshold: 1e+08
+            widthRatio: 1
+          width: 7
+          widthRatio: 1
+          xCol: _time
+          yCol: _value
+          yPos: 4
+    name: 001 - Vector Load Testing
