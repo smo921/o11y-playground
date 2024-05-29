@@ -1,5 +1,3 @@
-version: '3'
-
 networks:
   loki:
 
@@ -104,10 +102,10 @@ services:
       - .env
     healthcheck:
       test: ["CMD-SHELL", "/usr/bin/ls", "/secrets/influxdb_tokens/vector_token"]
-      interval: 30s
+      interval: 10s
       timeout: 2s
       retries: 5
-      start_period: 10s
+      start_period: 5s
     ports:
       - "8086:8086"
     networks:
