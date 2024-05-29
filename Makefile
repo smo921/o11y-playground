@@ -32,3 +32,8 @@ clean_volumes:
 
 env:
 	cp example.env .env
+
+# Experiments
+
+001: build start
+	make -f docs/001_Loki_Load_Testing/Makefile restore
