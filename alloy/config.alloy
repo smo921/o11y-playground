@@ -19,6 +19,18 @@ prometheus.exporter.unix "localhost" {
     set_collectors = [ "cpu", "disk", "netdev", "netstat" ]
 }
 
+discovery.relabel "localhost_label_cleanup" {
+  targets = concat(
+    prometheus.exporter.unix.localhost.targets,
+    prometheus.exporter.process.localhost.targets,
+  )
+
+  rule {
+    target_label = "instance"
+    replacement  = "localhost" // constants.hostname
+  }
+}
+
 // Begin Docker metrics
 prometheus.exporter.cadvisor "integrations_cadvisor" {
     docker_only = true
@@ -43,17 +55,11 @@ discovery.relabel "integrations_cadvisor" {
       target_label  = "container"
     }
 }
-
-//prometheus.scrape "integrations_cadvisor" {
-//    targets    = discovery.relabel.integrations_cadvisor.output
-//    forward_to = [prometheus.remote_write.default.receiver]
-//}
 // End Docker metrics
 
 prometheus.scrape "localhost" {
   targets    = concat(
-    prometheus.exporter.unix.localhost.targets,
-    prometheus.exporter.process.localhost.targets,
+    discovery.relabel.localhost_label_cleanup.output,
     discovery.relabel.integrations_cadvisor.output,
     [
       { __address__ = "localhost:12345" },    // alloy
