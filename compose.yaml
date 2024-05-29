@@ -81,10 +81,11 @@ services:
     env_file:
       - default.env
       - .env
-    entrypoint:
-      - /templates/entrypoint.sh
+    entrypoint: /local_bin/entrypoint.sh
     volumes:
-      - ./grafana/:/templates
+      - ./grafana/bin:/local_bin
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
       - secrets:/secrets
     ports:
       - "3000:3000"
