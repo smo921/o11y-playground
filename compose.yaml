@@ -5,6 +5,7 @@ volumes:
   alloy-data:
   influxdb-data:
   loki-data:
+  prometheus-data:
   vector-data:
   secrets:
 
@@ -142,3 +143,5 @@ services:
       - "9090:9090"
     networks:
       - loki
+    volumes:
+      - prometheus-data:/prometheus
