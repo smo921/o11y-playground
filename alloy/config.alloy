@@ -32,39 +32,26 @@ discovery.relabel "localhost_label_cleanup" {
 }
 
 // Begin Docker metrics
-prometheus.exporter.cadvisor "integrations_cadvisor" {
-  docker_only = true
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
 }
 
-discovery.relabel "integrations_cadvisor" {
-  targets = prometheus.exporter.cadvisor.integrations_cadvisor.targets
-
-  rule {
-    target_label = "job"
-    replacement  = "integrations/docker"
-  }
-
-  rule {
-    target_label = "instance"
-    replacement  = "localhost" // constants.hostname
-  }
-
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "container"
-  }
+prometheus.exporter.cadvisor "integrations_cadvisor" {
+  docker_only = true
+  storage_duration = "5m"
 }
 // End Docker metrics
 
 prometheus.scrape "localhost" {
   targets = concat(
     discovery.relabel.localhost_label_cleanup.output,
-    discovery.relabel.integrations_cadvisor.output,
+    prometheus.exporter.cadvisor.integrations_cadvisor.targets,
+    /*
     [
       { __address__ = "localhost:12345" },    // alloy
       { __address__ = "loki:3100", __metrics_path__ = "/metrics" },    // loki
     ],
+    */
   )
   forward_to = [prometheus.remote_write.default.receiver]
 }
