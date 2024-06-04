@@ -45,6 +45,7 @@ services:
     volumes:
       - ./alloy:/etc/alloy
       - alloy-data:/var/lib/alloy/data
+      - /var/run/docker.sock:/var/run/docker.sock:rw
 
   vector:
     build:
@@ -66,8 +67,6 @@ services:
       - vector-data:/data_dir
       - ./log_files:/log_files
       - secrets:/secrets
-    ports:
-      - "8686:8686"
     networks:
       - loki
 
@@ -134,6 +133,8 @@ services:
     command: >
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus
+      --storage.tsdb.retention.time=2d
+      --storage.tsdb.retention.size=20GB
       --web.console.libraries=/usr/share/prometheus/console_libraries
       --web.console.templates=/usr/share/prometheus/consoles/prometheus
       --enable-feature=remote-write-receiver
