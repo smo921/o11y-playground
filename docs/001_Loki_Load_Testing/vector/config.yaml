@@ -1,0 +1,102 @@
+##############################################
+#              MAIN CONFIG                   #
+##############################################
+api:
+  enabled: true
+  address: "0.0.0.0:8686"
+data_dir: /data_dir
+
+sources:
+  vector_logs:
+    type: internal_logs
+
+  vector_metrics:
+    type: internal_metrics
+
+  random_json_1:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_2:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_3:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_4:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_5:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_6:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_7:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+##############################################
+#              BEGIN TRANSFORMS              #
+##############################################
+transforms:
+  internal_log_decoration:
+    type: remap
+    inputs:
+      - vector_logs
+    source: |
+      .source = "vector"
+
+  decorate_random_json:
+    type: remap
+    inputs:
+      - random_json_*
+    source: |
+      .source = "random_json"
+
+##############################################
+#              BEGIN SINKS                   #
+##############################################
+sinks:
+  local_loki:
+    type: loki
+    inputs:
+      - internal_log_decoration
+      - decorate_random_json
+    endpoint: http://loki:3100
+    encoding:
+      codec: json
+    labels:
+      source: "{{.source}}"
+    out_of_order_action: accept
+    batch:
+      max_bytes: 4000000
+    buffer:
+      max_events: 10000
+
+  local_influxdb:
+    type: influxdb_metrics
+    inputs:
+      - vector_metrics
+    bucket: ${VECTOR_INFLUXDB_METRICS_BUCKET}
+    endpoint: http://influxdb:8086/
+    org: test_org
+    token: ${VECTOR_INFLUXDB_TOKEN}
+
+  local_prometheus:
+    type: prometheus_remote_write
+    inputs:
+      - vector_metrics
+    endpoint: http://prometheus:9090/api/v1/write
