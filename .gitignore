@@ -4,3 +4,5 @@
 influxdb/influx-configs
 
 log_files/
+
+vector/vector.yaml.bak

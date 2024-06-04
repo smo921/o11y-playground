@@ -15,6 +15,12 @@ common:
     kvstore:
       store: inmemory
 
+limits_config:
+  ingestion_burst_size_mb: 500  # default: 6
+  ingestion_rate_mb: 5000 # default 4
+  per_stream_rate_limit: 1024M # default 3MB
+  per_stream_rate_limit_burst: 4096M # default 15MB
+
 schema_config:
   configs:
     - from: 2020-10-24

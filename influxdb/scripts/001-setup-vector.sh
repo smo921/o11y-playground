@@ -3,7 +3,8 @@ set -e
 
 influx bucket create \
   --name ${VECTOR_INFLUXDB_METRICS_BUCKET} \
-  --description "Vector metrics"
+  --description "Vector metrics" \
+  --retention 2d
 
 BUCKET_ID=`influx bucket list \
   --name ${VECTOR_INFLUXDB_METRICS_BUCKET} \

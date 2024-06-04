@@ -6,3 +6,12 @@ restore: sws
 
 sws:
 	docker compose up sws -d
+
+PROJECTDIR := $(shell pwd)
+
+run:
+	mv ${CURDIR}/vector/vector.yaml ${CURDIR}/vector/vector.yaml.bak
+	cp ${CURDIR}/docs/001_Loki_Load_Testing/vector/config.yaml ${CURDIR}/vector/vector.yaml
+
+stop:
+	mv ${CURDIR}/vector/vector.yaml.bak ${CURDIR}/vector/vector.yaml

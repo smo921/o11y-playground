@@ -5,6 +5,7 @@ volumes:
   alloy-data:
   influxdb-data:
   loki-data:
+  prometheus-data:
   vector-data:
   secrets:
 
@@ -13,12 +14,16 @@ services:
     image: willfarrell/autoheal:latest
     tty: true
     container_name: autoheal
+    labels:
+      - service=autoheal
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
   sws: # https://static-web-server.net/getting-started/
     image: joseluisq/static-web-server:2
+    labels:
+      - service=sws
     ports:
       - "8787:80"
     networks:
@@ -31,6 +36,7 @@ services:
   ##############################################
   alloy:
     image: grafana/alloy:v1.1.0
+    user: root
     env_file:
       - default.env
       - .env
@@ -38,6 +44,8 @@ services:
       run --server.http.listen-addr=0.0.0.0:12345
       --storage.path=/var/lib/alloy/data
       /etc/alloy/config.alloy
+    labels:
+      - service=alloy
     ports:
       - "12345:12345"
     networks:
@@ -45,6 +53,11 @@ services:
     volumes:
       - ./alloy:/etc/alloy
       - alloy-data:/var/lib/alloy/data
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
 
   vector:
     build:
@@ -60,20 +73,23 @@ services:
         condition: service_started
     labels:
       - "autoheal=true"
+      - service=vector
+    ports:
+      - "8686"
     restart: always
     volumes:
       - ./vector:/etc/vector
       - vector-data:/data_dir
       - ./log_files:/log_files
       - secrets:/secrets
-    ports:
-      - "8686:8686"
     networks:
       - loki
 
   loki:
     image: grafana/loki:2.9.2
     command: -config.file=/etc/loki/config.yaml
+    labels:
+      - service=loki
     volumes:
       - ./loki:/etc/loki
       - loki-data:/loki
@@ -91,6 +107,8 @@ services:
       - default.env
       - .env
     entrypoint: /local_bin/entrypoint.sh
+    labels:
+      - service=grafana
     volumes:
       - ./grafana/bin:/local_bin
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -116,6 +134,8 @@ services:
       timeout: 2s
       retries: 5
       start_period: 5s
+    labels:
+      - service=influxdb
     ports:
       - "8086:8086"
     networks:
@@ -134,10 +154,16 @@ services:
     command: >
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus
+      --storage.tsdb.retention.time=2d
+      --storage.tsdb.retention.size=20GB
       --web.console.libraries=/usr/share/prometheus/console_libraries
       --web.console.templates=/usr/share/prometheus/consoles/prometheus
       --enable-feature=remote-write-receiver
+    labels:
+      - service=prometheus
     ports:
       - "9090:9090"
     networks:
       - loki
+    volumes:
+      - prometheus-data:/prometheus

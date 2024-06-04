@@ -5,44 +5,60 @@ logging {
 }
 
 loki.write "local_loki" {
-    endpoint {
-        url = "http://loki:3100/loki/api/v1/push"
-    }
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
 }
 
 prometheus.exporter.process "localhost" {
 
 }
 
+// Collect basic system metrics from the localhost
 prometheus.exporter.unix "localhost" {
-    set_collectors = [ "cpu", "disk", "netdev", "netstat" ]
+  set_collectors = [ "cpu", "disk", "netdev", "netstat" ]
 }
+
+discovery.relabel "localhost_label_cleanup" {
+  targets = concat(
+    prometheus.exporter.unix.localhost.targets,
+    prometheus.exporter.process.localhost.targets,
+  )
+
+  rule {
+    target_label = "instance"
+    replacement  = "localhost" // constants.hostname
+  }
+}
+
+// Begin Docker metrics
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+prometheus.exporter.cadvisor "integrations_cadvisor" {
+  docker_only = true
+  storage_duration = "5m"
+}
+// End Docker metrics
 
 prometheus.scrape "localhost" {
-  targets    = concat(prometheus.exporter.unix.localhost.targets, prometheus.exporter.process.localhost.targets)
+  targets = concat(
+    discovery.relabel.localhost_label_cleanup.output,
+    prometheus.exporter.cadvisor.integrations_cadvisor.targets,
+    /*
+    [
+      { __address__ = "localhost:12345" },    // alloy
+      { __address__ = "loki:3100", __metrics_path__ = "/metrics" },    // loki
+    ],
+    */
+  )
   forward_to = [prometheus.remote_write.default.receiver]
 }
 
-prometheus.scrape "alloy" {
-  // Collect metrics from the default listen address.
-  targets = [{
-    __address__ = "localhost:12345",
-  }]
-
-  forward_to = [prometheus.remote_write.default.receiver]
-}
-
-prometheus.scrape "loki" {
-  targets = [{
-    __address__ = "loki:3100",
-    __metrics_path__ = "/metrics",
-  }]
-
-  forward_to = [prometheus.remote_write.default.receiver]
-}
-
+// Prometheus Remote Write Endpoint
 prometheus.remote_write "default" {
   endpoint {
-    url = "http://prometheus:9090/api/v1/write" // "http://prometheus:9090/api/prom/push"
+    url = "http://prometheus:9090/api/v1/write"
   }
 }

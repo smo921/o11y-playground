@@ -6,9 +6,6 @@ api:
   address: "0.0.0.0:8686"
 data_dir: /data_dir
 
-##############################################
-#              BEGIN SOURCES                 #
-##############################################
 sources:
   vector_logs:
     type: internal_logs
@@ -19,26 +16,42 @@ sources:
   random_json_1:
     type: demo_logs
     format: json
-    interval: ${RANDOM_JSON_MESSAGE_INTERVAL:-0.001}  # seconds between messages ; 1k / sec
-    count: ${RANDOM_JSON_MESSAGE_COUNT:-1000000000} # 1 Billion
+    interval: 0.0
 
-  files:
-    type: file
-    include:
-      - /log_files/*
-    read_from: beginning
+  random_json_2:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_3:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_4:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_5:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_6:
+    type: demo_logs
+    format: json
+    interval: 0.0
+
+  random_json_7:
+    type: demo_logs
+    format: json
+    interval: 0.0
 
 ##############################################
 #              BEGIN TRANSFORMS              #
 ##############################################
 transforms:
-  files_decoration:
-    type: remap
-    inputs:
-      - files
-    source: |
-      .source = "files"
-
   internal_log_decoration:
     type: remap
     inputs:
@@ -61,7 +74,6 @@ sinks:
     type: loki
     inputs:
       - internal_log_decoration
-      - files_decoration
       - decorate_random_json
     endpoint: http://loki:3100
     encoding:
@@ -69,6 +81,10 @@ sinks:
     labels:
       source: "{{.source}}"
     out_of_order_action: accept
+    batch:
+      max_bytes: 4000000
+    buffer:
+      max_events: 10000
 
   local_influxdb:
     type: influxdb_metrics
