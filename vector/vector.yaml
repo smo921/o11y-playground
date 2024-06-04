@@ -3,6 +3,7 @@
 ##############################################
 api:
   enabled: true
+  address: "0.0.0.0:8686"
 data_dir: /data_dir
 
 ##############################################
@@ -15,7 +16,7 @@ sources:
   vector_metrics:
     type: internal_metrics
 
-  random_json:
+  random_json_1:
     type: demo_logs
     format: json
     interval: ${RANDOM_JSON_MESSAGE_INTERVAL:-0.001}  # seconds between messages ; 1k / sec
@@ -45,10 +46,10 @@ transforms:
     source: |
       .source = "vector"
 
-  random_json_decoration:
+  decorate_random_json:
     type: remap
     inputs:
-      - random_json
+      - random_json_*
     source: |
       .source = "random_json"
 
@@ -61,7 +62,7 @@ sinks:
     inputs:
       - internal_log_decoration
       - files_decoration
-      - random_json_decoration
+      - decorate_random_json
     endpoint: http://loki:3100
     encoding:
       codec: json
@@ -77,7 +78,6 @@ sinks:
     endpoint: http://influxdb:8086/
     org: test_org
     token: ${VECTOR_INFLUXDB_TOKEN}
-
 
   local_prometheus:
     type: prometheus_remote_write
