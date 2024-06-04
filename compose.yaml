@@ -36,6 +36,7 @@ services:
   ##############################################
   alloy:
     image: grafana/alloy:v1.1.0
+    user: root
     env_file:
       - default.env
       - .env
@@ -52,7 +53,11 @@ services:
     volumes:
       - ./alloy:/etc/alloy
       - alloy-data:/var/lib/alloy/data
-      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
 
   vector:
     build:
