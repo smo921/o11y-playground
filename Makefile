@@ -16,6 +16,8 @@ stop:
 down:
 	docker compose down
 
+restart: stop start
+
 clean: down clean_influxdb clean_volumes
 	docker compose ps -aq | xargs docker rm
 
@@ -30,10 +32,16 @@ clean_influxdb:
 clean_volumes:
 	docker volume ls -q -f "label=com.docker.compose.project=${CURDIR}" | xargs -I{} docker volume rm {}
 
+volume_stats:
+	docker system df -v | grep ${CURDIR}
+
 env:
 	cp example.env .env
 
 # Experiments
 
-001: build start
-	make -f docs/001_Loki_Load_Testing/Makefile restore
+001_load_test_start: build start
+	make -f docs/001_Loki_Load_Testing/Makefile run
+
+001_load_test_stop:
+	make -f docs/001_Loki_Load_Testing/Makefile stop
