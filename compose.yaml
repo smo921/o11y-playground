@@ -16,6 +16,7 @@ services:
     container_name: autoheal
     labels:
       - service=autoheal
+      - logging.enabled=true
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -24,6 +25,7 @@ services:
     image: joseluisq/static-web-server:2
     labels:
       - service=sws
+      - logging.enabled=true
     ports:
       - "8787:80"
     networks:
@@ -46,6 +48,7 @@ services:
       /etc/alloy/config.alloy
     labels:
       - service=alloy
+      - logging.enabled=false
     ports:
       - "12345:12345"
     networks:
@@ -75,6 +78,7 @@ services:
     labels:
       - "autoheal=true"
       - service=vector
+      - logging.enabled=false
     ports:
       - "8686"
     restart: always
@@ -92,6 +96,7 @@ services:
     command: -config.file=/etc/loki/config.yaml
     labels:
       - service=loki
+      - logging.enabled=true
     volumes:
       - ./loki:/etc/loki
       - loki-data:/loki
@@ -111,6 +116,7 @@ services:
     entrypoint: /local_bin/entrypoint.sh
     labels:
       - service=grafana
+      - logging.enabled=true
     volumes:
       - ./grafana/bin:/local_bin
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -138,6 +144,7 @@ services:
       start_period: 5s
     labels:
       - service=influxdb
+      - logging.enabled=true
     ports:
       - "8086:8086"
     networks:
@@ -163,6 +170,7 @@ services:
       --enable-feature=remote-write-receiver
     labels:
       - service=prometheus
+      - logging.enabled=true
     ports:
       - "9090:9090"
     networks:

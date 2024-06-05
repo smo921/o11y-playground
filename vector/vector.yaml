@@ -18,9 +18,8 @@ sources:
 
   docker:
     type: docker_logs
-    exclude_containers:
-      - o11y-playground-alloy
-      - o11y-playground-vector
+    include_labels:
+      - logging.enabled=true
 
   random_json_1:
     type: demo_logs
