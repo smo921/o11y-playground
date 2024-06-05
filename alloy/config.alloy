@@ -46,12 +46,10 @@ prometheus.scrape "localhost" {
   targets = concat(
     discovery.relabel.localhost_label_cleanup.output,
     prometheus.exporter.cadvisor.integrations_cadvisor.targets,
-    /*
     [
-      { __address__ = "localhost:12345" },    // alloy
+      // { __address__ = "localhost:12345" },    // alloy
       { __address__ = "loki:3100", __metrics_path__ = "/metrics" },    // loki
     ],
-    */
   )
   forward_to = [prometheus.remote_write.default.receiver]
 }
