@@ -16,6 +16,12 @@ sources:
   vector_metrics:
     type: internal_metrics
 
+  docker:
+    type: docker_logs
+    exclude_containers:
+      - o11y-playground-alloy
+      - o11y-playground-vector
+
   random_json_1:
     type: demo_logs
     format: json
@@ -32,6 +38,14 @@ sources:
 #              BEGIN TRANSFORMS              #
 ##############################################
 transforms:
+  docker_decoration:
+    type: remap
+    inputs:
+      - docker
+    source: |
+      .service = .label.service
+      .source = "docker"
+
   files_decoration:
     type: remap
     inputs:
@@ -45,6 +59,7 @@ transforms:
       - vector_logs
     source: |
       .source = "vector"
+      .service = "vector"
 
   decorate_random_json:
     type: remap
@@ -63,11 +78,13 @@ sinks:
       - internal_log_decoration
       - files_decoration
       - decorate_random_json
+      - docker_decoration
     endpoint: http://loki:3100
     encoding:
       codec: json
     labels:
       source: "{{.source}}"
+      service: "{{.service}}"
     out_of_order_action: accept
 
   local_influxdb:

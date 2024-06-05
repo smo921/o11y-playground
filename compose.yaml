@@ -55,6 +55,7 @@ services:
       - alloy-data:/var/lib/alloy/data
       - /:/rootfs:ro
       - /var/run:/var/run:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Necessary for reasons unknown
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
@@ -82,6 +83,7 @@ services:
       - vector-data:/data_dir
       - ./log_files:/log_files
       - secrets:/secrets
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - loki
 
