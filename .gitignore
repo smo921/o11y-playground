@@ -1,5 +1,6 @@
 .env
 .notes/
+TODO.md
 
 influxdb/influx-configs
 
