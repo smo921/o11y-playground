@@ -54,7 +54,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 9,
+      "id": 10,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -80,17 +80,16 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "container_fs_usage_bytes{container_label_service=\"loki\"} / 1000000",
+          "expr": "loki_ingester_chunk_stored_bytes_total{instance=\"loki:3100\"} / 1000000",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Loki (MB)",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Loki Disk Usage",
+      "title": "Loki Stored MB Total",
       "type": "stat"
     },
     {
@@ -172,39 +171,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -229,21 +196,24 @@
         "x": 0,
         "y": 8
       },
-      "id": 1,
+      "id": 9,
       "options": {
-        "legend": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
+      "pluginVersion": "10.4.3",
       "targets": [
         {
           "datasource": {
@@ -252,35 +222,18 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(rate(vector_component_sent_event_bytes_total{component_id=~\"random_json_.\"}[$__rate_interval])) / 1000000",
+          "expr": "container_fs_usage_bytes{container_label_service=\"loki\"} / 1000000",
           "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "interval": "",
-          "legendFormat": "Sent MB",
-          "range": true,
-          "refId": "Sent Bytes",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(rate(vector_component_sent_events_total{component_id=~\"random_json_.\"}[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Sent Events",
+          "legendFormat": "Loki (MB)",
           "range": true,
-          "refId": "Sent Events",
+          "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Random JSON Log Volume",
-      "type": "timeseries"
+      "title": "Loki Disk Usage",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -457,7 +410,6 @@
               "mode": "off"
             }
           },
-          "displayName": "${__field.labels[\"component_id\"]}",
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -473,23 +425,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "{component_id=\"random_json\", component_kind=\"source\", component_type=\"demo_logs\", host=\"29dd7fbf374d\", output=\"_default\"}"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#F2CC0C",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -497,7 +433,7 @@
         "x": 0,
         "y": 16
       },
-      "id": 7,
+      "id": 1,
       "options": {
         "legend": {
           "calcs": [
@@ -520,13 +456,13 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(rate(vector_component_sent_event_bytes_total[$__rate_interval])) / 1000000",
+          "expr": "sum(rate(vector_component_sent_event_bytes_total{component_id=~\"random_json_.\"}[$__rate_interval])) / 1000000",
           "fullMetaSearch": false,
-          "hide": false,
           "includeNullMetadata": true,
+          "interval": "",
           "legendFormat": "Sent MB",
           "range": true,
-          "refId": "A",
+          "refId": "Sent Bytes",
           "useBackend": false
         },
         {
@@ -536,17 +472,18 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(rate(vector_component_received_event_bytes_total[$__rate_interval])) / 1000000",
+          "expr": "sum(rate(vector_component_sent_events_total{component_id=~\"random_json_.\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
-          "legendFormat": "Received MB",
+          "instant": false,
+          "legendFormat": "Sent Events",
           "range": true,
-          "refId": "B",
+          "refId": "Sent Events",
           "useBackend": false
         }
       ],
-      "title": "Vector Log Volume (Bytes)",
+      "title": "Random JSON Log Volume",
       "type": "timeseries"
     },
     {
@@ -684,8 +621,79 @@
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "${__field.labels[\"component_id\"]}",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "{component_id=\"random_json\", component_kind=\"source\", component_type=\"demo_logs\", host=\"29dd7fbf374d\", output=\"_default\"}"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F2CC0C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -693,32 +701,57 @@
         "x": 0,
         "y": 24
       },
-      "id": 4,
+      "id": 7,
       "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": false,
-        "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
-      "pluginVersion": "10.4.3",
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
           },
+          "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "{source=\"vector\"} | json",
-          "queryType": "range",
-          "refId": "A"
+          "expr": "sum(rate(vector_component_sent_event_bytes_total[$__rate_interval])) / 1000000",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "legendFormat": "Sent MB",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum(rate(vector_component_received_event_bytes_total[$__rate_interval])) / 1000000",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "legendFormat": "Received MB",
+          "range": true,
+          "refId": "B",
+          "useBackend": false
         }
       ],
-      "title": "Panel Title",
-      "type": "logs"
+      "title": "Vector Log Volume (Bytes)",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -816,6 +849,44 @@
       ],
       "title": "Panel Title",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 4,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "10.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "editorMode": "builder",
+          "expr": "{source=\"vector\"} | json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Panel Title",
+      "type": "logs"
     }
   ],
   "refresh": "10s",
@@ -825,13 +896,13 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Vector Dashboard",
   "uid": "edn6poavrdx4wf",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
