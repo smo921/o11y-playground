@@ -119,6 +119,7 @@ services:
       - logging.enabled=true
     volumes:
       - ./grafana/bin:/local_bin
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
       - secrets:/secrets
