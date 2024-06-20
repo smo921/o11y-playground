@@ -1,13 +1,13 @@
-setup_repo: setup_influxdb
+setup_repo: build setup_influxdb
 	mkdir -p log_files
 
 setup_influxdb: clean_influxdb
-	docker compose up influxdb
+	docker compose up influxdb -d
 
 build:
 	docker compose build
 
-start:
+start: build
 	docker compose up -d
 
 stop:
@@ -36,7 +36,7 @@ volume_stats:
 	docker system df -v | grep ${CURDIR}
 
 env:
-	cp example.env .env
+	cp default.env .env
 
 # Experiments
 
