@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -44,7 +44,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -63,7 +64,7 @@
           "calcs": [
             "sum"
           ],
-          "fields": "/^\\{component_id=\"local_loki\", component_kind=\"sink\", component_type=\"loki\", host=\"f0dcaff6fdd4\"\\}$/",
+          "fields": "",
           "values": false
         },
         "showThresholdLabels": false,
@@ -89,7 +90,7 @@
           "useBackend": false
         }
       ],
-      "title": "Panel Title",
+      "title": "Loki - Events sent",
       "type": "gauge"
     },
     {
@@ -100,40 +101,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "log": 2,
-              "type": "log"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -148,7 +116,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -158,19 +127,23 @@
         "x": 12,
         "y": 0
       },
-      "id": 7,
+      "id": 9,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
+      "pluginVersion": "10.4.3",
       "targets": [
         {
           "datasource": {
@@ -179,10 +152,11 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(container_label_service) (irate(container_cpu_usage_seconds_total{container_label_com_docker_compose_project=\"o11y-playground\", container_label_service=\"loki\"}[5m])) * 100",
+          "expr": "increase(vector_component_sent_bytes_total{component_id=\"local_loki\"}[$__interval])",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "Loki CPU %",
+          "instant": false,
+          "legendFormat": "Raw MB",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -192,33 +166,21 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
-          "editorMode": "code",
-          "expr": "rate(vector_component_sent_events_total{component_id=\"local_loki\"}[$__rate_interval])",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Loki Events / sec",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(container_label_service) (irate(container_cpu_usage_seconds_total{container_label_com_docker_compose_project=\"o11y-playground\", container_label_service=\"vector\"}[5m])) * 100",
+          "expr": "increase(vector_component_sent_event_bytes_total{component_id=\"local_loki\"}[$__interval])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
-          "legendFormat": "Vector CPU %",
+          "instant": false,
+          "legendFormat": "Event MB",
           "range": true,
-          "refId": "C",
+          "refId": "B",
           "useBackend": false
         }
       ],
-      "title": "CPU % vs Events / sec",
-      "type": "timeseries"
+      "title": "Loki - MB sent",
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -323,6 +285,134 @@
           }
         }
       ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(container_label_service) (irate(container_cpu_usage_seconds_total{container_label_com_docker_compose_project=\"o11y-playground\", container_label_service=\"loki\"}[5m])) * 100",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "Loki CPU %",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "rate(vector_component_sent_events_total{component_id=\"local_loki\"}[$__rate_interval])",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Loki Events / sec",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(container_label_service) (irate(container_cpu_usage_seconds_total{container_label_com_docker_compose_project=\"o11y-playground\", container_label_service=\"vector\"}[5m])) * 100",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "legendFormat": "Vector CPU %",
+          "range": true,
+          "refId": "C",
+          "useBackend": false
+        }
+      ],
+      "title": "CPU % vs Events / sec",
       "type": "timeseries"
     }
   ],
