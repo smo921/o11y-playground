@@ -65,6 +65,12 @@ transforms:
     inputs:
       - random_json_*
     source: |
+      message, err = parse_json(.message, max_depth: 30)
+      if err == null {
+        . = merge!(., message)
+        del(.message)
+      }
+
       .source = "random_json"
 
 ##############################################

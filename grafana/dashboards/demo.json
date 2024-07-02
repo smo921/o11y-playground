@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -107,7 +107,7 @@
             "uid": "P8E80F9AEF21F6940"
           },
           "editorMode": "builder",
-          "expr": "sum by(status) (rate({source=\"random_json\"} | json | line_format `{{.message}}` | json | keep status | status =~ `[245]..` [1m]))",
+          "expr": "sum by(status) (rate({source=\"random_json\"} | json | keep status | status =~ `[245]..` [1m]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -319,7 +319,7 @@
             "uid": "P8E80F9AEF21F6940"
           },
           "editorMode": "builder",
-          "expr": "sum by(status) (rate({source=\"random_json\"} | json | line_format `{{.message}}` | json | keep status [1m]))",
+          "expr": "sum by(status) (rate({source=\"random_json\"} | json | keep status [1m]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -443,13 +443,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Log Demo Dashboard",
   "uid": "fdnz7n8txxf5sf",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
