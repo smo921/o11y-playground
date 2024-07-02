@@ -9,6 +9,8 @@ datasources:
   isDefault: true
   version: 1
   editable: false
+  jsonData:
+    timeout: 300 # request timeout in seconds
 - name: Prometheus
   type: prometheus
   url: http://prometheus:9090

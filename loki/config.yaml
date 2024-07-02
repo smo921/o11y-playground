@@ -20,6 +20,7 @@ limits_config:
   ingestion_rate_mb: 5000 # default 4
   per_stream_rate_limit: 1024M # default 3MB
   per_stream_rate_limit_burst: 4096M # default 15MB
+  query_timeout: 5m
 
 schema_config:
   configs:
