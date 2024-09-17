@@ -21,6 +21,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+  toolbox:
+    build: ./toolbox
+    ports:
+      - "8126:8126"
+    networks:
+      - loki
+
   sws: # https://static-web-server.net/getting-started/
     image: joseluisq/static-web-server:2
     labels:
