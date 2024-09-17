@@ -63,6 +63,16 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
 
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    command: "--path.rootfs=/host"
+    ports:
+      - "9100:9100"
+    volumes:
+      - /:/host:ro
+    networks:
+      - loki
+
   vector:
     build:
       context: .
