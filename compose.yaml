@@ -5,9 +5,11 @@ volumes:
   alloy-data:
   influxdb-data:
   loki-data:
+  minio-data:
   prometheus-data:
   vector-data:
   secrets:
+  tempo-data:
 
 services:
   autoheal: # https://github.com/willfarrell/docker-autoheal
@@ -119,6 +121,64 @@ services:
       - loki-data:/loki
     ports:
       - "3100:3100"
+    networks:
+      - o11y-playground
+
+  minio:
+    image: minio/minio:latest
+    command: server /minio --address ':9000' --console-address ':9001'
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    volumes:
+      - minio-data:/minio
+    networks:
+      - o11y-playground
+
+  minio-createbuckets:
+    image: minio/mc
+    networks:
+      - o11y-playground
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force myminio/tempo;
+      /usr/bin/mc mb myminio/tempo;
+      /usr/bin/mc anonymous set public myminio/tempo;
+      exit 0;
+      "
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    depends_on:
+      minio-createbuckets:
+        condition: service_completed_successfully
+    ports:
+      - "14268:14268"  # jaeger ingest
+      - "3200:3200"   # tempo
+      - "9095:9095" # tempo grpc
+      - "4317:4317"  # otlp grpc
+      - "4318:4318"  # otlp http
+      - "9411:9411"   # zipkin
+    volumes:
+      - ./tempo/config.yaml:/etc/tempo.yaml
+      - tempo-data:/var/tempo
+    networks:
+      - o11y-playground
+
+  k6-tracing:
+    image: ghcr.io/grafana/xk6-client-tracing:latest
+    command:
+      - run
+      - /param.js
+    volumes:
+      - ./tempo/param.js:/param.js:ro
+    depends_on:
+      - tempo
+    restart: always
     networks:
       - o11y-playground
 
