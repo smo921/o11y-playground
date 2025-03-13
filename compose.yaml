@@ -1,5 +1,5 @@
 networks:
-  loki:
+  o11y-playground:
 
 volumes:
   alloy-data:
@@ -26,7 +26,7 @@ services:
     ports:
       - "8126:8126"
     networks:
-      - loki
+      - o11y-playground
 
   sws: # https://static-web-server.net/getting-started/
     image: joseluisq/static-web-server:2
@@ -36,7 +36,7 @@ services:
     ports:
       - "8787:80"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - ./docs:/public
 
@@ -59,7 +59,7 @@ services:
     ports:
       - "12345:12345"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - ./alloy:/etc/alloy
       - alloy-data:/var/lib/alloy/data
@@ -78,7 +78,7 @@ services:
     volumes:
       - /:/host:ro
     networks:
-      - loki
+      - o11y-playground
 
   vector:
     build:
@@ -106,7 +106,7 @@ services:
       - secrets:/secrets
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - loki
+      - o11y-playground
 
   loki:
     image: grafana/loki:2.9.8
@@ -120,7 +120,7 @@ services:
     ports:
       - "3100:3100"
     networks:
-      - loki
+      - o11y-playground
 
   grafana:
     image: grafana/grafana:latest
@@ -143,7 +143,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - loki
+      - o11y-playground
 
   ##############################################
   #              BEGIN INFLUXDB                #
@@ -166,7 +166,7 @@ services:
     ports:
       - "8086:8086"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - ./influxdb:/etc/influxdb2
       - ./influxdb/scripts:/docker-entrypoint-initdb.d
@@ -192,6 +192,6 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - prometheus-data:/prometheus
