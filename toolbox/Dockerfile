@@ -1,5 +1,9 @@
 FROM ubuntu:latest
 
-RUN apt update && apt install -y netcat-traditional tcpdump iputils-ping curl
+RUN apt update && apt install -y netcat-traditional tcpdump iputils-ping curl socat
 
-CMD [ "nc", "-ul", "-p8126" ]
+EXPOSE 8125
+
+# ENTRYPOINT [ "nc", "-ulk", "8125" ]
+ENTRYPOINT [ "socat" ]
+CMD [ "-u", "-d", "UDP-RECVFROM:8125,reuseaddr,fork", "STDOUT" ]

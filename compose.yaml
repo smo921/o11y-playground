@@ -26,7 +26,7 @@ services:
   toolbox:
     build: ./toolbox
     ports:
-      - "8126:8126"
+      - "8125:8125/udp"
     networks:
       - o11y-playground
 
