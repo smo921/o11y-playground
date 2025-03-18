@@ -5,7 +5,8 @@ volumes:
   alloy-data:
   influxdb-data:
   loki-data:
-  minio-data:
+  minio1-data:
+  minio2-data:
   prometheus-data:
   vector-data:
   secrets:
@@ -113,6 +114,11 @@ services:
   loki:
     image: grafana/loki:2.9.8
     command: -config.file=/etc/loki/config.yaml
+    depends_on:
+      minio1-createbuckets:
+        condition: service_completed_successfully
+      minio2-createbuckets:
+        condition: service_completed_successfully
     labels:
       - service=loki
       - logging.enabled=true
@@ -124,29 +130,58 @@ services:
     networks:
       - o11y-playground
 
-  minio:
+  minio1:
     image: minio/minio:latest
     command: server /minio --address ':9000' --console-address ':9001'
     ports:
       - "19000:9000"
       - "19001:9001"
     volumes:
-      - minio-data:/minio
+      - minio1-data:/minio
     networks:
       - o11y-playground
 
-  minio-createbuckets:
+  minio2:
+    image: minio/minio:latest
+    command: server /minio --address ':9000' --console-address ':9001'
+    ports:
+      - "29000:9000"
+      - "29001:9001"
+    volumes:
+      - minio2-data:/minio
+    networks:
+      - o11y-playground
+
+  minio1-createbuckets:
     image: minio/mc
     networks:
       - o11y-playground
     depends_on:
-      - minio
+      - minio1
     entrypoint: >
       /bin/sh -c "
-      until (/usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
+      until (/usr/bin/mc alias set myminio http://minio1:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
       /usr/bin/mc rm -r --force myminio/tempo;
+      /usr/bin/mc rm -r --force myminio/loki1;
+      /usr/bin/mc rm -r --force myminio/loki2;
       /usr/bin/mc mb myminio/tempo;
+      /usr/bin/mc mb myminio/loki1;
+      /usr/bin/mc mb myminio/loki2;
       /usr/bin/mc anonymous set public myminio/tempo;
+      exit 0;
+      "
+
+  minio2-createbuckets:
+    image: minio/mc
+    networks:
+      - o11y-playground
+    depends_on:
+      - minio2
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio2:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force myminio/loki3;
+      /usr/bin/mc mb myminio/loki3;
       exit 0;
       "
 
@@ -154,7 +189,7 @@ services:
     image: grafana/tempo:2.6.1
     command: [ "-config.file=/etc/tempo.yaml" ]
     depends_on:
-      minio-createbuckets:
+      minio1-createbuckets:
         condition: service_completed_successfully
     ports:
       - "14268:14268"  # jaeger ingest

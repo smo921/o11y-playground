@@ -6,10 +6,6 @@ server:
 
 common:
   path_prefix: /loki
-  storage:
-    filesystem:
-      chunks_directory: /loki/chunks
-      rules_directory: /loki/rules
   replication_factor: 1
   ring:
     kvstore:
@@ -24,13 +20,19 @@ limits_config:
 
 schema_config:
   configs:
-    - from: 2020-10-24
-      store: boltdb-shipper
-      object_store: filesystem
-      schema: v11
+    - from: 2020-05-15
+      store: tsdb
+      object_store: s3
+      schema: v13
       index:
         prefix: index_
         period: 24h
+
+storage_config:
+  aws:
+    s3: http://minioadmin:minioadmin@minio1:9000/loki1
+    endpoint: http://minioadmin:minioadmin@minio1:9000/loki1
+    s3forcepathstyle: true
 
 query_scheduler:
   max_outstanding_requests_per_tenant: 4096
