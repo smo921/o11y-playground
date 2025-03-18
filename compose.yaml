@@ -26,10 +26,20 @@ services:
 
   toolbox:
     build: ./toolbox
-    ports:
-      - "8125:8125/udp"
     networks:
       - o11y-playground
+
+  socat_metrics:
+    image: alpine/socat
+    command: "-u UDP-RECVFROM:8125,reuseaddr,fork STDOUT"
+    ports:
+      - "8125:8125/udp"
+
+  socat_tracing:
+    image: alpine/socat
+    command: "-u TCP-LISTEN:8126,reuseaddr,fork STDOUT"
+    ports:
+      - "8126:8126"
 
   sws: # https://static-web-server.net/getting-started/
     image: joseluisq/static-web-server:2
