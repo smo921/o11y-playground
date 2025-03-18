@@ -1,13 +1,16 @@
 networks:
-  loki:
+  o11y-playground:
 
 volumes:
   alloy-data:
   influxdb-data:
   loki-data:
+  minio1-data:
+  minio2-data:
   prometheus-data:
   vector-data:
   secrets:
+  tempo-data:
 
 services:
   autoheal: # https://github.com/willfarrell/docker-autoheal
@@ -23,10 +26,20 @@ services:
 
   toolbox:
     build: ./toolbox
+    networks:
+      - o11y-playground
+
+  socat_metrics:
+    image: alpine/socat
+    command: "-u UDP-RECVFROM:8125,reuseaddr,fork STDOUT"
+    ports:
+      - "8125:8125/udp"
+
+  socat_tracing:
+    image: alpine/socat
+    command: "-u TCP-LISTEN:8126,reuseaddr,fork STDOUT"
     ports:
       - "8126:8126"
-    networks:
-      - loki
 
   sws: # https://static-web-server.net/getting-started/
     image: joseluisq/static-web-server:2
@@ -36,7 +49,7 @@ services:
     ports:
       - "8787:80"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - ./docs:/public
 
@@ -59,7 +72,7 @@ services:
     ports:
       - "12345:12345"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - ./alloy:/etc/alloy
       - alloy-data:/var/lib/alloy/data
@@ -78,7 +91,7 @@ services:
     volumes:
       - /:/host:ro
     networks:
-      - loki
+      - o11y-playground
 
   vector:
     build:
@@ -106,11 +119,16 @@ services:
       - secrets:/secrets
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - loki
+      - o11y-playground
 
   loki:
     image: grafana/loki:2.9.8
     command: -config.file=/etc/loki/config.yaml
+    depends_on:
+      minio1-createbuckets:
+        condition: service_completed_successfully
+      minio2-createbuckets:
+        condition: service_completed_successfully
     labels:
       - service=loki
       - logging.enabled=true
@@ -120,7 +138,94 @@ services:
     ports:
       - "3100:3100"
     networks:
-      - loki
+      - o11y-playground
+
+  minio1:
+    image: minio/minio:latest
+    command: server /minio --address ':9000' --console-address ':9001'
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    volumes:
+      - minio1-data:/minio
+    networks:
+      - o11y-playground
+
+  minio2:
+    image: minio/minio:latest
+    command: server /minio --address ':9000' --console-address ':9001'
+    ports:
+      - "29000:9000"
+      - "29001:9001"
+    volumes:
+      - minio2-data:/minio
+    networks:
+      - o11y-playground
+
+  minio1-createbuckets:
+    image: minio/mc
+    networks:
+      - o11y-playground
+    depends_on:
+      - minio1
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio1:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force myminio/tempo;
+      /usr/bin/mc rm -r --force myminio/loki1;
+      /usr/bin/mc rm -r --force myminio/loki2;
+      /usr/bin/mc mb myminio/tempo;
+      /usr/bin/mc mb myminio/loki1;
+      /usr/bin/mc mb myminio/loki2;
+      /usr/bin/mc anonymous set public myminio/tempo;
+      exit 0;
+      "
+
+  minio2-createbuckets:
+    image: minio/mc
+    networks:
+      - o11y-playground
+    depends_on:
+      - minio2
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio2:9000 minioadmin minioadmin) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force myminio/loki3;
+      /usr/bin/mc mb myminio/loki3;
+      exit 0;
+      "
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    depends_on:
+      minio1-createbuckets:
+        condition: service_completed_successfully
+    ports:
+      - "14268:14268"  # jaeger ingest
+      - "3200:3200"   # tempo
+      - "9095:9095" # tempo grpc
+      - "4317:4317"  # otlp grpc
+      - "4318:4318"  # otlp http
+      - "9411:9411"   # zipkin
+    volumes:
+      - ./tempo/config.yaml:/etc/tempo.yaml
+      - tempo-data:/var/tempo
+    networks:
+      - o11y-playground
+
+  k6-tracing:
+    image: ghcr.io/grafana/xk6-client-tracing:latest
+    command:
+      - run
+      - /param.js
+    volumes:
+      - ./tempo/param.js:/param.js:ro
+    depends_on:
+      - tempo
+    restart: always
+    networks:
+      - o11y-playground
 
   grafana:
     image: grafana/grafana:latest
@@ -143,7 +248,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - loki
+      - o11y-playground
 
   ##############################################
   #              BEGIN INFLUXDB                #
@@ -166,7 +271,7 @@ services:
     ports:
       - "8086:8086"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - ./influxdb:/etc/influxdb2
       - ./influxdb/scripts:/docker-entrypoint-initdb.d
@@ -192,6 +297,6 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - loki
+      - o11y-playground
     volumes:
       - prometheus-data:/prometheus

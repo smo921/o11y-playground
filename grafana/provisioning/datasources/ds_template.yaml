@@ -26,3 +26,7 @@ datasources:
     tlsSkipVerify: true
   secureJsonData:
     token: ${VECTOR_INFLUXDB_TOKEN}
+- name: Tempo
+  type: tempo
+  url: http://tempo:3200
+  basicAuth: false
