@@ -2,7 +2,7 @@ apiVersion: 1
 datasources:
 - name: Loki
   type: loki
-  access: proxy 
+  access: proxy
   orgId: 1
   url: http://loki:3100
   basicAuth: false
@@ -11,6 +11,23 @@ datasources:
   editable: false
   jsonData:
     timeout: 300 # request timeout in seconds
+    httpHeaderName1: "X-Scope-OrgID"
+  secureJsonData:
+    httpHeaderValue1: "default"
+- name: Loki Test Tenant
+  type: loki
+  access: proxy
+  orgId: 1
+  url: http://loki:3100
+  basicAuth: false
+  isDefault: false
+  version: 1
+  editable: false
+  jsonData:
+    timeout: 300 # request timeout in seconds
+    httpHeaderName1: "X-Scope-OrgID"
+  secureJsonData:
+    httpHeaderValue1: "testing"
 - name: Prometheus
   type: prometheus
   url: http://prometheus:9090

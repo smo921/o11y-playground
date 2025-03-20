@@ -1,5 +1,5 @@
 # Sourced from /etc/loki/local-config.yaml in the grafana/loki:2.9.2 image
-auth_enabled: false
+auth_enabled: true
 
 server:
   http_listen_port: 3100
@@ -12,15 +12,14 @@ common:
       store: inmemory
 
 ingester:
-  chunk_encoding: snappy      # https://grafana.com/blog/2023/12/28/the-concise-guide-to-loki-how-to-get-the-most-out-of-your-query-performance/
-  max_chunk_age: 5m
-  chunk_target_size: 1500000  # default: ~ 1.5MB
+  chunk_encoding: gzip      # default gzip, https://grafana.com/blog/2023/12/28/the-concise-guide-to-loki-how-to-get-the-most-out-of-your-query-performance/
+  chunk_target_size: 1536KB  # default: 1536KB ~ 1.5MB
 
 limits_config:
   ingestion_burst_size_mb: 500  # default: 6
   ingestion_rate_mb: 5000 # default 4
-  per_stream_rate_limit: 1024M # default 3MB
-  per_stream_rate_limit_burst: 4096M # default 15MB
+  # per_stream_rate_limit: 1024M # default 3MB
+  # per_stream_rate_limit_burst: 4096M # default 15MB
   query_timeout: 5m
 
 schema_config:
@@ -35,8 +34,9 @@ schema_config:
 
 storage_config:
   aws:
-    s3: http://minioadmin:minioadmin@minio1:9000/loki1
-    endpoint: http://minioadmin:minioadmin@minio1:9000/loki1
+    s3: http://minioadmin:minioadmin@minio1:9000/
+    endpoint: http://minio1:9000/
+    bucketnames: loki1
     s3forcepathstyle: true
 
 query_scheduler:

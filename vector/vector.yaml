@@ -31,7 +31,9 @@ sources:
     type: file
     include:
       - /log_files/*
+    max_line_bytes: 1049000 # 1MBi
     read_from: beginning
+    remove_after_secs: 30
 
 ##############################################
 #              BEGIN TRANSFORMS              #
@@ -44,6 +46,7 @@ transforms:
     source: |
       .service = .label.service
       .source = "docker"
+      .loki = { "tenant_id": "default" }
 
   files_decoration:
     type: remap
@@ -51,6 +54,18 @@ transforms:
       - files
     source: |
       .source = "files"
+      .source_file = .file
+
+      message, err = parse_json(.message)
+      if err == null {
+        del(.message)
+        merged, err = merge(., message)
+        if err == null {
+          . = merged
+        }
+      }
+      .service = .service || .application || "unknown"
+      .loki = { "tenant_id": "testing" }
 
   internal_log_decoration:
     type: remap
@@ -59,6 +74,7 @@ transforms:
     source: |
       .source = "vector"
       .service = "vector"
+      .loki = { "tenant_id": "default" }
 
   decorate_random_json:
     type: remap
@@ -72,6 +88,7 @@ transforms:
       }
 
       .source = "random_json"
+      .loki = { "tenant_id": "default" }
 
 ##############################################
 #              BEGIN SINKS                   #
@@ -91,6 +108,7 @@ sinks:
       source: "{{.source}}"
       service: "{{.service}}"
     out_of_order_action: accept
+    tenant_id: "{{ .loki.tenant_id }}"
 
   local_influxdb:
     type: influxdb_metrics
