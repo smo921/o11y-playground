@@ -103,6 +103,8 @@ services:
     depends_on:
       influxdb:
         condition: service_healthy
+      loki:
+        condition: service_healthy
       prometheus:
         condition: service_started
     labels:
@@ -115,20 +117,26 @@ services:
     volumes:
       - ./vector:/etc/vector
       - vector-data:/data_dir
-      - ./log_files:/log_files
+      - ./log_files:/log_files:rw
       - secrets:/secrets
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - o11y-playground
 
   loki:
-    image: grafana/loki:2.9.8
+    image: grafana/loki:3.4.2
     command: -config.file=/etc/loki/config.yaml
     depends_on:
       minio1-createbuckets:
         condition: service_completed_successfully
       minio2-createbuckets:
         condition: service_completed_successfully
+    healthcheck:
+      test: wget --quiet --tries=1 --output-document=- http://localhost:3100/ready | grep -q -w ready || exit 1
+      start_period: 20s
+      interval: 10s
+      timeout: 1s
+      retries: 12  # try for 2 minutes
     labels:
       - service=loki
       - logging.enabled=true
@@ -143,6 +151,9 @@ services:
   minio1:
     image: minio/minio:latest
     command: server /minio --address ':9000' --console-address ':9001'
+    labels:
+      - service=minio1
+      - logging.enabled=true
     ports:
       - "19000:9000"
       - "19001:9001"
