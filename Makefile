@@ -20,6 +20,7 @@ restart: stop start
 
 clean: down clean_influxdb clean_volumes
 	docker compose ps -aq | xargs docker rm
+	rm -f log_files/*
 
 CURDIR := $(shell basename $(shell pwd))
 
