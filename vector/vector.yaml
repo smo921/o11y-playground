@@ -31,9 +31,10 @@ sources:
     type: file
     include:
       - /log_files/*
+    ignore_checkpoints: true
     max_line_bytes: 1049000 # 1MBi
     read_from: beginning
-    remove_after_secs: 30
+    remove_after_secs: 5
 
 ##############################################
 #              BEGIN TRANSFORMS              #
@@ -44,8 +45,10 @@ transforms:
     inputs:
       - docker
     source: |
-      .service = .label.service
-      .source = "docker"
+      .loki_labels = {
+        "service_name": .label.service,
+        "source": "docker"
+      }
       .loki = { "tenant_id": "default" }
 
   files_decoration:
@@ -53,18 +56,24 @@ transforms:
     inputs:
       - files
     source: |
-      .source = "files"
       .source_file = .file
 
-      message, err = parse_json(.message)
-      if err == null {
-        del(.message)
-        merged, err = merge(., message)
+      if is_string(.message) {
+        message, err = parse_json(.message)
         if err == null {
-          . = merged
+          del(.message)
+          merged, err = merge(., message)
+          if err == null {
+            . = merged
+          }
         }
       }
-      .service = .service || .application || "unknown"
+
+      .loki_labels = {
+        "source": .source.file || "files",
+        "service_name": .service.name || .service || .application || "unknown"
+      }
+
       .loki = { "tenant_id": "testing" }
 
   internal_log_decoration:
@@ -72,8 +81,10 @@ transforms:
     inputs:
       - vector_logs
     source: |
-      .source = "vector"
-      .service = "vector"
+      .loki_labels = {
+        "service_name": "vector",
+        "source": "vector"
+      }
       .loki = { "tenant_id": "default" }
 
   decorate_random_json:
@@ -87,7 +98,10 @@ transforms:
         del(.message)
       }
 
-      .source = "random_json"
+      .loki_labels = {
+        "service_name": "random_json",
+        "source": "random_json"
+      }
       .loki = { "tenant_id": "default" }
 
 ##############################################
@@ -105,8 +119,8 @@ sinks:
     encoding:
       codec: json
     labels:
-      source: "{{.source}}"
-      service: "{{.service}}"
+      "*": "{{ loki_labels }}"
+    remove_label_fields: true
     out_of_order_action: accept
     tenant_id: "{{ .loki.tenant_id }}"
 
